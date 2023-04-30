@@ -5,9 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xxx.reggie.common.R;
 import com.xxx.reggie.dto.SetmealDto;
 import com.xxx.reggie.pojo.Category;
-import com.xxx.reggie.pojo.Dish;
 import com.xxx.reggie.pojo.Setmeal;
-import com.xxx.reggie.pojo.SetmealDish;
 import com.xxx.reggie.service.CategoryService;
 import com.xxx.reggie.service.DishService;
 import com.xxx.reggie.service.SetmealDishService;
@@ -47,10 +45,10 @@ public class SetmealController {
     /**
      * [按名称]分页查询套餐数据
      *
-     * @param page
-     * @param pageSize
-     * @param name
-     * @return
+     * @param page     第几页
+     * @param pageSize 每页多少条
+     * @param name     [套餐名]
+     * @return page对象
      */
     @GetMapping("/page")
     public R<Page<SetmealDto>> page(Integer page, Integer pageSize, String name) {
@@ -77,8 +75,11 @@ public class SetmealController {
 
                     //获取套餐分类名称
                     Category category = categoryService.getById(setmeal.getCategoryId());
-                    String categoryName = category.getName();
-                    setmealDto.setCategoryName(categoryName);
+                    if (category != null) {
+                        String categoryName = category.getName();
+                        setmealDto.setCategoryName(categoryName);
+                    }
+
                     return setmealDto;
                 })
                 .collect(Collectors.toList());
@@ -91,30 +92,30 @@ public class SetmealController {
     /**
      * 新增套餐
      *
-     * @param setmealDto
-     * @return
+     * @param setmealDto json数据封装setmealDto对象
+     * @return msg
      */
     @PostMapping
     public R<String> save(@RequestBody SetmealDto setmealDto) {
-        setmealService.saveSAD(setmealDto);
+        setmealService.saveSad(setmealDto);
         return R.success("保存成功");
     }
 
     /**
      * 根据id查询数据（修改回显）
      *
-     * @param id
-     * @return
+     * @param id id
+     * @return setmealDto对象
      */
     @GetMapping("/{id}")
     public R<SetmealDto> getById(@PathVariable Long id) {
-        SetmealDto setmealDto = setmealService.getSAD(id);
+        SetmealDto setmealDto = setmealService.getSad(id);
         return R.success(setmealDto);
     }
 
     @PutMapping
     public R<String> update(@RequestBody SetmealDto setmealDto) {
-        setmealService.updateSAD(setmealDto);
+        setmealService.updateSad(setmealDto);
 
         return R.success("修改成功");
     }
@@ -124,14 +125,10 @@ public class SetmealController {
      *
      * @param status 希望变成的状态
      * @param ids    需要修改状态的套餐的id[s]
-     * @return
+     * @return msg
      */
     @PostMapping("/status/{status}")
     public R<String> updateStatus(@PathVariable Integer status, Long... ids) {
-        /**
-         * 套餐中菜品停售时，对应套餐也要停售。且不能起售
-         */
-
         SetmealDto setmealDto = new SetmealDto();
         for (Long id : ids) {
             setmealDto.setStatus(status);
@@ -145,7 +142,7 @@ public class SetmealController {
      * [批量]删除套餐
      *
      * @param ids 需要删除的套餐的id[s]
-     * @return
+     * @return msg
      */
     @DeleteMapping
     public R<String> delete(@RequestParam List<Long> ids) {

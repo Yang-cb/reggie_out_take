@@ -18,29 +18,29 @@ public interface SetmealService extends IService<Setmeal> {
     /**
      * 保存套餐到setmeal表，保存套餐中的菜品到setmeal_dish，共操作两张表
      *
-     * @param setmealDto
+     * @param setmealDto json
      */
-    public void saveSAD(SetmealDto setmealDto);
+    void saveSad(SetmealDto setmealDto);
 
     /**
      * 按id查询，数据回显
      *
-     * @param id
-     * @return
+     * @param id /id
+     * @return SetmealDto
      */
-    public SetmealDto getSAD(Long id);
+    SetmealDto getSad(Long id);
 
     /**
      * 修改
      *
-     * @param setmealDto
+     * @param setmealDto json
      */
-    void updateSAD(SetmealDto setmealDto);
+    void updateSad(SetmealDto setmealDto);
 
     /**
      * [批量]删除套餐
      *
-     * @param ids
+     * @param ids ?ids&ids
      */
     void deleteList(List<Long> ids);
 }

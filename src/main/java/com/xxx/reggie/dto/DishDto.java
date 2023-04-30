@@ -3,6 +3,7 @@ package com.xxx.reggie.dto;
 import com.xxx.reggie.pojo.Dish;
 import com.xxx.reggie.pojo.DishFlavor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
  * @description 描述
  * @date 2023/4/21 21:14
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class DishDto extends Dish {
     //口味

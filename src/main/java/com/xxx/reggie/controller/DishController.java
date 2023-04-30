@@ -35,12 +35,12 @@ public class DishController {
     /**
      * 添加菜品
      *
-     * @param dishDto
-     * @return
+     * @param dishDto json
+     * @return msg
      */
     @PostMapping
     public R<String> add(@RequestBody DishDto dishDto) {
-        dishService.saveDAF(dishDto);
+        dishService.saveDaf(dishDto);
         return R.success("保存成功");
     }
 
@@ -94,25 +94,25 @@ public class DishController {
     /**
      * （修改回显）根据id查询菜品基本信息，口味信息
      *
-     * @param id
-     * @return
+     * @param id /id
+     * @return dishDto
      */
     @GetMapping("/{id}")
     public R<DishDto> getOne(@PathVariable Long id) {
-        DishDto dishDto = dishService.getDAF(id);
+        DishDto dishDto = dishService.getDaf(id);
         return R.success(dishDto);
     }
 
     /**
      * 修改菜品
      *
-     * @param dishDto
-     * @return
+     * @param dishDto json
+     * @return msg
      */
     @PutMapping
     public R<String> update(@RequestBody DishDto dishDto) {
 
-        dishService.updateDAF(dishDto);
+        dishService.updateDaf(dishDto);
 
         return R.success("修改成功");
     }
@@ -122,7 +122,7 @@ public class DishController {
      * 根据分类id查询该分类下的菜品信息（新建套餐时使用）
      *
      * @param dish 对象dish中包含id，且传过来其他字段也能使用该方法，通用性更强。
-     * @return
+     * @return Dish集合
      */
     @GetMapping("/list")
     public R<List<Dish>> list(Dish dish) {
@@ -141,7 +141,7 @@ public class DishController {
      * [批量]删除菜品
      *
      * @param ids 需要删除的id
-     * @return
+     * @return msg
      */
     @DeleteMapping
     public R<String> delete(@RequestParam List<Long> ids) {
@@ -154,7 +154,7 @@ public class DishController {
      *
      * @param status 希望变成的状态
      * @param ids    需要修改状态的套餐的id[s]
-     * @return
+     * @return msg
      */
     @PostMapping("/status/{status}")
     public R<String> updateStatus(@PathVariable Integer status, @RequestParam List<Long> ids) {

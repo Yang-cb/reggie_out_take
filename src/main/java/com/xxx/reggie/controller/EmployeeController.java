@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-// 日志
+/**
+ * @author yang_
+ */ // 日志
 @Slf4j
 @RestController
 @RequestMapping("/employee")
@@ -60,7 +62,7 @@ public class EmployeeController {
      * 员工退出
      *
      * @param request 用于清除session中保存的数据
-     * @return
+     * @return msg
      */
     @PostMapping("/logout")
     public R<String> logout(HttpServletRequest request) {
@@ -74,7 +76,7 @@ public class EmployeeController {
      * 添加员工
      *
      * @param employee 前端传递的json数据封装成对象
-     * @return
+     * @return msg
      */
     @PostMapping
     public R<String> add(@RequestBody Employee employee) {
@@ -94,7 +96,7 @@ public class EmployeeController {
      * @param page     第几页
      * @param pageSize 每页几条数据
      * @param name     具体查哪个人
-     * @return
+     * @return page
      */
     @GetMapping("/page")
     public R<Page<Employee>> page(Integer page, Integer pageSize, String name) {
@@ -118,7 +120,7 @@ public class EmployeeController {
      * 更新数据
      *
      * @param employee 需要更新的数据
-     * @return
+     * @return msg
      */
     @PutMapping
     public R<String> update(@RequestBody Employee employee) {
@@ -132,8 +134,8 @@ public class EmployeeController {
     /**
      * 根据id查询用户（数据回显）
      *
-     * @param id
-     * @return
+     * @param id /id
+     * @return Employee
      */
     @GetMapping("/{id}")
     public R<Employee> getById(@PathVariable Long id) {

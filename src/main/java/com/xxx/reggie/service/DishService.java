@@ -17,26 +17,28 @@ public interface DishService extends IService<Dish> {
     /**
      * 保存 菜品基本信息 及 菜品的口味信息，需要两张表
      *
-     * @param dishDto
+     * @param dishDto json对象
      */
-    public void saveDAF(DishDto dishDto);
+    void saveDaf(DishDto dishDto);
 
     /**
      * 根据id查询 菜品基本信息 及 菜品的口味信息，需要两张表
      *
-     * @param id
-     * @return
+     * @param id id
+     * @return dishDto
      */
-    public DishDto getDAF(Long id);
+    DishDto getDaf(Long id);
 
     /**
      * 修改信息
-     * @param dishDto
+     *
+     * @param dishDto json
      */
-    public void updateDAF(DishDto dishDto);
+    void updateDaf(DishDto dishDto);
 
     /**
      * [批量]删除菜品
+     *
      * @param ids 需要删除的id
      */
     void deleteList(List<Long> ids);

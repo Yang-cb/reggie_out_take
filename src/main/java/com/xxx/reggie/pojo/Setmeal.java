@@ -7,11 +7,11 @@ import lombok.Data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 /**
  * 套餐
  *
+ * @author yang_
  * @TableName setmeal
  */
 

@@ -6,6 +6,9 @@ import com.xxx.reggie.pojo.Employee;
 import com.xxx.reggie.service.EmployeeService;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author yang_
+ */
 @Service
 public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> implements EmployeeService {
 }

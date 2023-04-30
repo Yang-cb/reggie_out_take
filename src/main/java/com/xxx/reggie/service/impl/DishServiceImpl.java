@@ -34,11 +34,12 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     /**
      * 保存 菜品基本信息 及 菜品的口味信息，需要两张表
      *
-     * @param dishDto
+     * @param dishDto json
      */
     //操作两张表，使用事务保证都能保存上
+    @Override
     @Transactional
-    public void saveDAF(DishDto dishDto) {
+    public void saveDaf(DishDto dishDto) {
         //保存菜品到菜品表 dish
         this.save(dishDto);
         //保存口味
@@ -63,11 +64,12 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     /**
      * 根据id查询 菜品基本信息 及 菜品的口味信息，需要两张表
      *
-     * @param id
-     * @return
+     * @param id id
+     * @return dishDto
      */
+    @Override
     @Transactional
-    public DishDto getDAF(Long id) {
+    public DishDto getDaf(Long id) {
         //1，根据id查询菜品基本信息，从dish表查
         Dish dish = this.getById(id);
 
@@ -87,11 +89,11 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     /**
      * 修改信息
      *
-     * @param dishDto
+     * @param dishDto json
      */
     @Override
     @Transactional
-    public void updateDAF(DishDto dishDto) {
+    public void updateDaf(DishDto dishDto) {
         //1，将菜品基本信息保存到 dish表
         this.updateById(dishDto);
         //2，清除原有口味 dish_flavor

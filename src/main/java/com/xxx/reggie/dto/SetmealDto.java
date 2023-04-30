@@ -1,9 +1,9 @@
 package com.xxx.reggie.dto;
 
-import com.xxx.reggie.pojo.Dish;
 import com.xxx.reggie.pojo.Setmeal;
 import com.xxx.reggie.pojo.SetmealDish;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -14,6 +14,7 @@ import java.util.List;
  * @description 描述
  * @date 2023/4/29 16:44
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class SetmealDto extends Setmeal {
     //套餐分类

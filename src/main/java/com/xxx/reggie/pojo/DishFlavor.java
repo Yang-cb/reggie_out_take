@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 /**
  * 菜品口味关系表
  *
+ * @author yang_
  * @TableName dish_flavor
  */
 @Data

@@ -35,10 +35,10 @@ public class LoginFilter implements Filter {
         };
 
         //1,获取本次请求的url
-        String requestURI = request.getRequestURI();
+        String requestUri = request.getRequestURI();
 
         //2,判断本次请求是否需要拦截
-        if (notFilter(requestURI, notFilterUrls)) {
+        if (notFilter(requestUri, notFilterUrls)) {
 //            log.info("{}请求不需要拦截", requestURI);
             // 放行
             filterChain.doFilter(request, response);
@@ -59,7 +59,7 @@ public class LoginFilter implements Filter {
         }
 
         //4,拦截请求，并响应前端
-        log.info("拦截到请求：{}", requestURI);
+        log.info("拦截到请求：{}", requestUri);
         // NOTLOGIN 是前端需要的格式
         response.getWriter().write(JSON.toJSONString(R.error("NOTLOGIN")));
     }
@@ -67,14 +67,14 @@ public class LoginFilter implements Filter {
     /**
      * 判断本次请求是否需要拦截
      *
-     * @param requestURI 本次请求的url
+     * @param requestUri 本次请求的uri
      * @param noFilterUrls 不需要拦截的请求
      * @return true ：不拦截
      */
-    private boolean notFilter(String requestURI, String[] noFilterUrls) {
+    private boolean notFilter(String requestUri, String[] noFilterUrls) {
         for (String url : noFilterUrls) {
             // 不需要拦截
-            if (ANT_PATH_MATCHER.match(url, requestURI)) {
+            if (ANT_PATH_MATCHER.match(url, requestUri)) {
                 return true;
             }
         }

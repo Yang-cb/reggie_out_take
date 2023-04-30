@@ -30,7 +30,7 @@ public class CategoryController {
      *
      * @param page     第几页
      * @param pageSize 每页多少条
-     * @return
+     * @return page
      */
     @GetMapping("/page")
     public R<Page<Category>> page(Integer page, Integer pageSize) {
@@ -52,7 +52,7 @@ public class CategoryController {
      * 添加数据
      *
      * @param category 前端键入的值，封装为json
-     * @return
+     * @return msg
      */
     @PostMapping
     public R<String> add(@RequestBody Category category) {
@@ -64,8 +64,8 @@ public class CategoryController {
     /**
      * 修改数据
      *
-     * @param category
-     * @return
+     * @param category json
+     * @return msg
      */
     @PutMapping
     public R<String> update(@RequestBody Category category) {
@@ -76,8 +76,8 @@ public class CategoryController {
     /**
      * 根据id删除
      *
-     * @param ids
-     * @return
+     * @param ids ?ids
+     * @return msg
      */
     @DeleteMapping
     public R<String> delete(Long ids) {
@@ -90,7 +90,7 @@ public class CategoryController {
      * 查询分类的数据
      *
      * @param category 主要是获取type：用于区分 菜品分类，套餐分类
-     * @return
+     * @return Category集合
      */
     @GetMapping("/list")
     public R<List<Category>> list(Category category) {

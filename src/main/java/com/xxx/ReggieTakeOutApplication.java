@@ -6,6 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+/**
+ * @author yang_
+ */
 @Slf4j
 @SpringBootApplication
 //使 Servlet（控制器）、Filter（过滤器）、Listener（监听器）

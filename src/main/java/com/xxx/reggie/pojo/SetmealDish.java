@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -13,6 +12,7 @@ import lombok.Data;
 /**
  * 套餐菜品关系
  *
+ * @author yang_
  * @TableName setmeal_dish
  */
 @Data

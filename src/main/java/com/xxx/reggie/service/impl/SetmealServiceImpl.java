@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xxx.reggie.common.CustomException;
 import com.xxx.reggie.dto.SetmealDto;
 import com.xxx.reggie.mapper.SetmealMapper;
-import com.xxx.reggie.pojo.Dish;
 import com.xxx.reggie.pojo.Setmeal;
 import com.xxx.reggie.pojo.SetmealDish;
 import com.xxx.reggie.service.SetmealDishService;
@@ -35,11 +34,11 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     /**
      * 保存套餐到setmeal表，保存套餐中的菜品到setmeal_dish，共操作两张表
      *
-     * @param setmealDto
+     * @param setmealDto json
      */
     @Override
     @Transactional
-    public void saveSAD(SetmealDto setmealDto) {
+    public void saveSad(SetmealDto setmealDto) {
         //1，保存套餐到setmeal表
         this.save(setmealDto);
         //2，清除原有的套餐菜品数据
@@ -59,7 +58,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
     @Override
     @Transactional
-    public SetmealDto getSAD(Long id) {
+    public SetmealDto getSad(Long id) {
         //1，查询套餐基础信息
         Setmeal setmeal = this.getById(id);
 
@@ -80,11 +79,11 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     /**
      * 修改
      *
-     * @param setmealDto
+     * @param setmealDto json
      */
     @Override
     @Transactional
-    public void updateSAD(SetmealDto setmealDto) {
+    public void updateSad(SetmealDto setmealDto) {
         //1，修改套餐基本信息
         this.updateById(setmealDto);
         //2，删除套餐菜品对应表中的旧数据
@@ -107,7 +106,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     /**
      * [批量]删除套餐
      *
-     * @param ids
+     * @param ids ?id&id
      */
     @Override
     @Transactional

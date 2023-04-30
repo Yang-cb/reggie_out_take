@@ -13,7 +13,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -46,17 +45,20 @@ public class CommonController {
         //1，获取file的原始名字（上传时的名字）
         String originalFilename = file.getOriginalFilename();
         //2，获取文件后缀
-        String lastName = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String lastName = null;
+        if (originalFilename != null) {
+            lastName = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
         //3，判断指定转存目录是否存在
         File dir = new File(imgPath);
         if (!dir.exists()) {
             dir.mkdirs();
         }
         //4，随机获取一个文件名，防止冲突覆盖
-        UUID randomUUID = UUID.randomUUID();
+        UUID randomuuid = UUID.randomUUID();
 
         //5，拼接文件名
-        String fileName = randomUUID + lastName;
+        String fileName = randomuuid + lastName;
 
         //6，拼接转存目录
         String transferPath = imgPath + fileName;
@@ -84,13 +86,13 @@ public class CommonController {
     public void download(HttpServletResponse response, String name) {
         try {
             //字节输入流读取数据
-            FileInputStream is = new FileInputStream(new File(imgPath + name));
+            FileInputStream is = new FileInputStream(imgPath + name);
             //字节输出流写到页面数据
             ServletOutputStream os = response.getOutputStream();
 
             //设置响应类型为图片
             response.setContentType("image/jpeg");
-
+            //图片对拷
             int len;
             byte[] bytes = new byte[1024];
             while ((len = is.read(bytes)) != -1) {
