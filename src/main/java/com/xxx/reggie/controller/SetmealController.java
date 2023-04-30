@@ -5,8 +5,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xxx.reggie.common.R;
 import com.xxx.reggie.dto.SetmealDto;
 import com.xxx.reggie.pojo.Category;
+import com.xxx.reggie.pojo.Dish;
 import com.xxx.reggie.pojo.Setmeal;
+import com.xxx.reggie.pojo.SetmealDish;
 import com.xxx.reggie.service.CategoryService;
+import com.xxx.reggie.service.DishService;
+import com.xxx.reggie.service.SetmealDishService;
 import com.xxx.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -32,6 +36,12 @@ public class SetmealController {
 
     @Autowired
     CategoryService categoryService;
+
+    @Autowired
+    SetmealDishService setmealDishService;
+
+    @Autowired
+    DishService dishService;
 
 
     /**
@@ -62,7 +72,10 @@ public class SetmealController {
         List<SetmealDto> setmealDtoRecords = setmealRecords.stream()
                 .map(setmeal -> {
                     SetmealDto setmealDto = new SetmealDto();
+                    //拷贝套餐基本信息
                     BeanUtils.copyProperties(setmeal, setmealDto);
+
+                    //获取套餐分类名称
                     Category category = categoryService.getById(setmeal.getCategoryId());
                     String categoryName = category.getName();
                     setmealDto.setCategoryName(categoryName);

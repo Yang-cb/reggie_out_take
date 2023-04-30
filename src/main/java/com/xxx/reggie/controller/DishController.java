@@ -61,7 +61,8 @@ public class DishController {
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
                 .like(name != null, Dish::getName, name)
-                .orderByDesc(Dish::getSort);
+                .orderByDesc(Dish::getSort)
+                .orderByDesc(Dish::getUpdateTime);
         //3，使用Dish分页器分页查询数据库
         dishService.page(dishPage, queryWrapper);
         //4，创建DishDto的分页器
@@ -118,7 +119,7 @@ public class DishController {
 
 
     /**
-     * 根据分类id查询该分类下的菜品信息
+     * 根据分类id查询该分类下的菜品信息（新建套餐时使用）
      *
      * @param dish 对象dish中包含id，且传过来其他字段也能使用该方法，通用性更强。
      * @return
@@ -130,9 +131,34 @@ public class DishController {
                 .eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId())
                 .eq(Dish::getStatus, 1) //只要 在售 的菜品（状态为1）
                 .orderByAsc(Dish::getSort)  //排序
-                .orderByDesc(Dish::getUpdateTime);
+                .orderByAsc(Dish::getUpdateTime);
 
         List<Dish> dishList = dishService.list(queryWrapper);
         return R.success(dishList);
+    }
+
+    /**
+     * [批量]删除菜品
+     *
+     * @param ids 需要删除的id
+     * @return
+     */
+    @DeleteMapping
+    public R<String> delete(@RequestParam List<Long> ids) {
+        dishService.deleteList(ids);
+        return R.success("删除成功");
+    }
+
+    /**
+     * [批量]修改菜品状态：停售/起售
+     *
+     * @param status 希望变成的状态
+     * @param ids    需要修改状态的套餐的id[s]
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    public R<String> updateStatus(@PathVariable Integer status, @RequestParam List<Long> ids) {
+        dishService.updateStatus(status, ids);
+        return R.success("修改状态成功");
     }
 }

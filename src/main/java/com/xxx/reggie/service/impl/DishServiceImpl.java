@@ -2,6 +2,7 @@ package com.xxx.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xxx.reggie.common.CustomException;
 import com.xxx.reggie.dto.DishDto;
 import com.xxx.reggie.mapper.DishMapper;
 import com.xxx.reggie.pojo.Dish;
@@ -107,5 +108,48 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
                 .collect(Collectors.toList());
 
         dishFlavorService.saveBatch(flavors);
+    }
+
+    /**
+     * [批量]删除菜品
+     *
+     * @param ids 需要删除的id
+     */
+    @Override
+    public void deleteList(List<Long> ids) {
+        //1，判断菜品是否是 售卖状态
+        LambdaQueryWrapper<Dish> qw = new LambdaQueryWrapper<>();
+        qw.in(Dish::getId, ids)
+                .eq(Dish::getStatus, 1); // 1 为正在售卖
+        int count = this.count(qw);
+        if (count > 0) {
+            //有售卖的菜品
+            throw new CustomException("菜品正在售卖，无法删除");
+        }
+
+        //2，删除对应的口味
+        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(DishFlavor::getDishId, ids);
+        dishFlavorService.remove(queryWrapper);
+
+        //3，删除菜品
+        this.removeByIds(ids);
+    }
+
+    /**
+     * [批量]修改套餐状态：停售/起售
+     *
+     * @param status 希望变成的状态
+     * @param ids    需要修改状态的套餐的id[s]
+     */
+    @Override
+    public void updateStatus(Integer status, List<Long> ids) {
+        Dish dish = new Dish();
+        dish.setStatus(status);
+
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Dish::getId, ids);
+
+        this.update(dish, queryWrapper);
     }
 }
