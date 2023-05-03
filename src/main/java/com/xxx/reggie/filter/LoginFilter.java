@@ -31,7 +31,12 @@ public class LoginFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         // 不需要拦截的请求：
         String[] notFilterUrls = new String[]{
-                "/employee/login", "/employee/logout", "/backend/**", "/front/**"
+                "/employee/login",
+                "/employee/logout",
+                "/backend/**",
+                "/front/**",
+                "/user/login",
+                "/user/sendMsg"
         };
 
         //1,获取本次请求的url
@@ -39,20 +44,26 @@ public class LoginFilter implements Filter {
 
         //2,判断本次请求是否需要拦截
         if (notFilter(requestUri, notFilterUrls)) {
-//            log.info("{}请求不需要拦截", requestURI);
             // 放行
             filterChain.doFilter(request, response);
             return;
         }
 
-        //3,判断用户是否已经登录
+        //3.1,判断 管理端 用户是否已经登录
         Long empId = (Long)request.getSession().getAttribute("employee");
         if (empId != null) {
-//            log.info("{}用户已登录", empId);
-
             // 将id添加到处理该业务的线程的变量中
             ThreadContextId.setContextId(empId);
+            // 放行
+            filterChain.doFilter(request, response);
+            return;
+        }
 
+        //3.2,判断 移动端 用户是否已经登录
+        Long userId = (Long)request.getSession().getAttribute("user");
+        if (userId != null) {
+            // 将id添加到处理该业务的线程的变量中
+            ThreadContextId.setContextId(userId);
             // 放行
             filterChain.doFilter(request, response);
             return;

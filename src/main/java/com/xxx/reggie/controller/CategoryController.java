@@ -87,7 +87,7 @@ public class CategoryController {
     }
 
     /**
-     * 查询分类的数据
+     * 查询具体分类的数据
      *
      * @param category 主要是获取type：用于区分 菜品分类，套餐分类
      * @return Category集合

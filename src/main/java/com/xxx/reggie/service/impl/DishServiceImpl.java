@@ -154,4 +154,36 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
         this.update(dish, queryWrapper);
     }
+
+    /**
+     * 根据分类id查询该分类下的菜品信息（新建套餐时、移动端使用）
+     *
+     * @param dishDto 对象dishDto中包含id，且传过来其他字段也能使用该方法，通用性更强。
+     * @return Dish集合，移动端需要展示口味
+     */
+    @Override
+    public List<DishDto> listDaf(DishDto dishDto) {
+        //1，查询菜品基本信息
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper
+                .eq(dishDto.getCategoryId() != null, Dish::getCategoryId, dishDto.getCategoryId())
+                .eq(Dish::getStatus, 1) //只要 在售 的菜品（状态为1）
+                .orderByAsc(Dish::getSort)  //排序
+                .orderByAsc(Dish::getUpdateTime);
+        List<Dish> dishList = this.list(queryWrapper);
+        //2，基本信息的基础上添加口味信息
+        List<DishDto> dishDtoList = dishList.stream().map(dish -> {
+                    DishDto dto = new DishDto();
+                    //拷贝菜品基本信息
+                    BeanUtils.copyProperties(dish, dto);
+                    //添加菜品口味信息
+                    LambdaQueryWrapper<DishFlavor> df = new LambdaQueryWrapper<>();
+                    df.eq(DishFlavor::getDishId, dish.getId());
+                    List<DishFlavor> dishFlavors = dishFlavorService.list(df);
+                    dto.setFlavors(dishFlavors);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return dishDtoList;
+    }
 }

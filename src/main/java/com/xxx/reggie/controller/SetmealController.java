@@ -6,6 +6,7 @@ import com.xxx.reggie.common.R;
 import com.xxx.reggie.dto.SetmealDto;
 import com.xxx.reggie.pojo.Category;
 import com.xxx.reggie.pojo.Setmeal;
+import com.xxx.reggie.pojo.SetmealDish;
 import com.xxx.reggie.service.CategoryService;
 import com.xxx.reggie.service.DishService;
 import com.xxx.reggie.service.SetmealDishService;
@@ -148,5 +149,38 @@ public class SetmealController {
     public R<String> delete(@RequestParam List<Long> ids) {
         setmealService.deleteList(ids);
         return R.success("删除成功");
+    }
+
+    /**
+     * 查询具体套餐的数据
+     *
+     * @param setmeal 封装了 菜品分类id：categoryId 和 状态status
+     * @return 查到的套餐集合
+     */
+    @GetMapping("/list")
+    public R<List<Setmeal>> list(Setmeal setmeal) {
+        //1，获取套餐分类id，套餐的状态
+        Long categoryId = setmeal.getCategoryId();
+        Integer setmealStatus = setmeal.getStatus();
+        //2，根据套餐分类id查询套餐
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        //查询该分类下的起售的套餐
+        queryWrapper.eq(categoryId != null, Setmeal::getCategoryId, categoryId)
+                .eq(setmealStatus != null, Setmeal::getStatus, setmealStatus)
+                .orderByDesc(Setmeal::getUpdateTime);
+        List<Setmeal> list = setmealService.list(queryWrapper);
+        return R.success(list);
+    }
+
+    /**
+     * 查看套餐（菜品）的详情（移动端）
+     *
+     * @param id 套餐（菜品）id
+     * @return
+     */
+    @GetMapping("/dish/{id}")
+    public R<SetmealDish> getDish(@PathVariable Long id) {
+        // ...
+        return null;
     }
 }

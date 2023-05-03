@@ -51,4 +51,11 @@ public interface DishService extends IService<Dish> {
      */
     void updateStatus(Integer status, List<Long> ids);
 
+    /**
+     * 根据分类id查询该分类下的菜品信息（新建套餐时、移动端使用）
+     *
+     * @param dishDto 对象dishDto中包含id，且传过来其他字段也能使用该方法，通用性更强。
+     * @return Dish集合，移动端需要展示口味
+     */
+    List<DishDto> listDaf(DishDto dishDto);
 }

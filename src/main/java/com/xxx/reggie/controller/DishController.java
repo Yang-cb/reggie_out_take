@@ -111,30 +111,21 @@ public class DishController {
      */
     @PutMapping
     public R<String> update(@RequestBody DishDto dishDto) {
-
         dishService.updateDaf(dishDto);
-
         return R.success("修改成功");
     }
 
 
     /**
-     * 根据分类id查询该分类下的菜品信息（新建套餐时使用）
+     * 根据分类id查询该分类下的菜品信息（新建套餐时、移动端使用）
      *
-     * @param dish 对象dish中包含id，且传过来其他字段也能使用该方法，通用性更强。
-     * @return Dish集合
+     * @param dishDto 对象dishDto中包含id，且传过来其他字段也能使用该方法，通用性更强。
+     * @return Dish集合，移动端需要展示口味
      */
     @GetMapping("/list")
-    public R<List<Dish>> list(Dish dish) {
-        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper
-                .eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId())
-                .eq(Dish::getStatus, 1) //只要 在售 的菜品（状态为1）
-                .orderByAsc(Dish::getSort)  //排序
-                .orderByAsc(Dish::getUpdateTime);
-
-        List<Dish> dishList = dishService.list(queryWrapper);
-        return R.success(dishList);
+    public R<List<DishDto>> list(DishDto dishDto) {
+        List<DishDto> dishDtoList = dishService.listDaf(dishDto);
+        return R.success(dishDtoList);
     }
 
     /**
