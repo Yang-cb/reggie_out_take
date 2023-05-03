@@ -2,17 +2,20 @@ package com.xxx.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xxx.reggie.common.CustomException;
 import com.xxx.reggie.common.R;
 import com.xxx.reggie.common.ThreadContextId;
 import com.xxx.reggie.pojo.Orders;
 import com.xxx.reggie.service.OrdersService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * reggie_take_out.com.xxx.reggie.controller
@@ -67,21 +70,50 @@ public class OrdersController {
 
 
     /**
-     * [根据条件]分页查询订单数据
+     * [根据条件]分页查询订单数据（服务端）
      *
      * @param page      第几页
      * @param pageSize  每页多少条
      * @param number    订单号
-     * @param beginTime 时间范围：开始时间
-     * @param endTime   时间范围：结束时间
+     * @param beginTime 下单时间范围：开始时间
+     * @param endTime   下单时间范围：结束时间
      * @return page
      */
     @GetMapping("/page")
     public R<Page<Orders>> page(Integer page, Integer pageSize, String number,
-                                Date beginTime, Date endTime) {
-        //请求 URL: /order/page?page=1&pageSize=10&number=111&beginTime=2023-04-18%2000%3A00%3A00&endTime=2023-05-12%2023%3A59%3A59
-        //请求方法: GET
-        log.info("");
-        return null;
+                                @DateTimeFormat String beginTime, @DateTimeFormat String endTime) {
+        Page<Orders> ordersPage = new Page<>(page, pageSize);
+
+        LambdaQueryWrapper<Orders> qw = new LambdaQueryWrapper<>();
+        //订单号
+        qw.like(number != null, Orders::getNumber, number);
+        //大于开始时间
+        qw.gt(beginTime != null, Orders::getOrderTime, beginTime);
+        //小于结束时间
+        qw.lt(endTime != null, Orders::getOrderTime, endTime);
+
+        ordersService.page(ordersPage, qw);
+        return R.success(ordersPage);
+    }
+
+
+    /**
+     * 更改订单状态（服务端）
+     *
+     * @param orders json 封装了订单id、修改后的状态
+     * @return msg
+     */
+    @PutMapping
+    public R<String> updateStatus(@RequestBody Orders orders) {
+        //1，查看当前订单状态是否与要修改的状态一样
+        Integer newStatus = orders.getStatus();
+        Orders byIdOrders = ordersService.getById(orders.getId());
+        Integer oldStatus = byIdOrders.getStatus();
+        if (Objects.equals(oldStatus, newStatus)) {
+            throw new CustomException("订单已经是该状态");
+        }
+        //2，修改状态
+        ordersService.updateById(orders);
+        return R.success("修改成功");
     }
 }
