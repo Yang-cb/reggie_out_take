@@ -1,14 +1,13 @@
 package com.xxx.reggie.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xxx.reggie.common.R;
 import com.xxx.reggie.dto.UserDto;
 import com.xxx.reggie.pojo.User;
 import com.xxx.reggie.service.UserService;
-import com.xxx.reggie.util.SMSUtils;
 import com.xxx.reggie.util.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.concurrent.TimeUnit;
 
 /**
  * reggie_take_out.com.xxx.reggie.controller
@@ -31,15 +31,18 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    //将验证码保存到redis中
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
     /**
      * 发送验证码到指定手机号
      *
      * @param user    带有手机号的json
-     * @param request 保存验证码
      * @return msg
      */
     @PostMapping("/sendMsg")
-    public R<String> sendMsg(@RequestBody User user, HttpServletRequest request) {
+    public R<String> sendMsg(@RequestBody User user) {
         //1，获取手机号
         String phone = user.getPhone();
 
@@ -50,8 +53,13 @@ public class UserController {
             //3，将验证码通过短信发送到手机
             // SMSUtils.sendMessage("瑞吉外卖", "", phone, code);
             log.info("本次登录验证码为 : {}", code);
-            //4，将验证码保存，便于后续比较
-            request.getSession().setAttribute(phone, code);
+
+            //4，将验证码保存到session，便于后续比较
+            //request.getSession().setAttribute(phone, code);
+
+            //4，将验证码保存到redis，并设置有效期为5分钟
+            redisTemplate.opsForValue().set(phone, code, 5, TimeUnit.MINUTES);
+
             return R.success("验证码发送成功");
         }
         return R.error("验证码发送失败");
@@ -61,12 +69,12 @@ public class UserController {
      * 登录：如果是新用户会注册账户
      *
      * @param userDto userDto对象，包含手机号和验证码
-     * @param request 取出保存的验证码
+     * @param request 保存用户id
      * @return 登录成功，将用户信息发送给前端，保存到浏览器
      */
     @PostMapping("/login")
     public R<User> login(@RequestBody UserDto userDto, HttpServletRequest request) {
-        User user = userService.login(userDto, request);
+        User user = userService.login(userDto);
         if (user == null) {
             return R.error("登陆失败");
         }
