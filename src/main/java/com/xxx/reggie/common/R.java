@@ -2,6 +2,7 @@ package com.xxx.reggie.common;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,8 +11,9 @@ import java.util.Map;
  *
  * @param <T>
  */
+//可序列化，方便缓存
 @Data
-public class R<T> {
+public class R<T> implements Serializable {
     private Integer code; //编码：1成功，0和其它数字为失败
 
     private String msg; //错误信息
@@ -21,7 +23,7 @@ public class R<T> {
     private Map map = new HashMap(); //动态数据
 
     public static <T> R<T> success(T object) {
-        R<T> r = new R<T>();
+        R<T> r = new R<>();
         r.data = object;
         r.code = 1;
         return r;

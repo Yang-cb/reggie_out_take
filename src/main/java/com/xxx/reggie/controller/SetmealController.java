@@ -14,6 +14,8 @@ import com.xxx.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -96,6 +98,8 @@ public class SetmealController {
      * @param setmealDto json数据封装setmealDto对象
      * @return msg
      */
+    //新增套餐的同时将已有缓存全部删除
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     @PostMapping
     public R<String> save(@RequestBody SetmealDto setmealDto) {
         setmealService.saveSad(setmealDto);
@@ -114,10 +118,17 @@ public class SetmealController {
         return R.success(setmealDto);
     }
 
+    /**
+     * 修改套餐信息
+     *
+     * @param setmealDto json封装对象
+     * @return
+     */
+    //修改套餐的同时将已有缓存全部删除
     @PutMapping
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public R<String> update(@RequestBody SetmealDto setmealDto) {
         setmealService.updateSad(setmealDto);
-
         return R.success("修改成功");
     }
 
@@ -145,6 +156,8 @@ public class SetmealController {
      * @param ids 需要删除的套餐的id[s]
      * @return msg
      */
+    //删除套餐，同时将已有缓存全部删除
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     @DeleteMapping
     public R<String> delete(@RequestParam List<Long> ids) {
         setmealService.deleteList(ids);
@@ -157,6 +170,8 @@ public class SetmealController {
      * @param setmeal 封装了 菜品分类id：categoryId 和 状态status
      * @return 查到的套餐集合
      */
+    //将返回结果加入redis缓存
+    @Cacheable(cacheNames = "setmealCache", key = "#setmeal.categoryId+'_'+#setmeal.status")
     @GetMapping("/list")
     public R<List<Setmeal>> list(Setmeal setmeal) {
         //1，获取套餐分类id，套餐的状态
