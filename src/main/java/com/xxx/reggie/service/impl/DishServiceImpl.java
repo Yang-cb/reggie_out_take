@@ -12,7 +12,8 @@ import com.xxx.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,17 +32,17 @@ import java.util.stream.Collectors;
 public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements DishService {
     @Autowired
     private DishFlavorService dishFlavorService;
-    @Autowired
-    private RedisTemplate<Object, Object> redisTemplate;
 
     /**
-     * 保存 菜品基本信息 及 菜品的口味信息，需要两张表
+     * 新增 菜品基本信息 及 菜品的口味信息，需要两张表
      *
      * @param dishDto json
      */
     //操作两张表，使用事务保证都能保存上
     @Override
     @Transactional
+    //新增菜品的同时，将缓存数据清除
+    @CacheEvict(cacheNames = "dishCache", allEntries = true)
     public void saveDaf(DishDto dishDto) {
         //保存菜品到菜品表 dish
         this.save(dishDto);
@@ -62,10 +63,6 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
         //4，保存口味到口味表 dish_flavor
         dishFlavorService.saveBatch(flavors);
-
-        //5，清除redis中的缓存
-        String key = "dish_" + dishDto.getCategoryId();
-        redisTemplate.delete(key);
     }
 
     /**
@@ -94,12 +91,14 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     }
 
     /**
-     * 修改信息
+     * 修改菜品信息
      *
      * @param dishDto json
      */
     @Override
     @Transactional
+    //修改菜品信息的同时，清除缓存
+    @CacheEvict(cacheNames = "dishCache", allEntries = true)
     public void updateDaf(DishDto dishDto) {
         //1，将菜品基本信息保存到 dish表
         this.updateById(dishDto);
@@ -116,10 +115,6 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
                 })
                 .collect(Collectors.toList());
         dishFlavorService.saveBatch(flavors);
-        //4，清除redis原有的缓存数据
-        //构造一个关于该分类的key
-        String key = "dish_" + dishDto.getCategoryId();
-        redisTemplate.delete(key);
     }
 
     /**
@@ -172,18 +167,10 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
      * @return Dish集合，移动端需要展示口味
      */
     @Override
+    //如果缓存中有数据，直接返回缓存数据；如果缓存中没有数据，调用该方法并将数据加入缓存
+    @Cacheable(cacheNames = "dishCache", key = "#dishDto.categoryId")
     public List<DishDto> listDaf(DishDto dishDto) {
         List<DishDto> dishDtoList = null;
-
-        //构造一个key
-        String key = "dish_" + dishDto.getCategoryId();
-        //先从redis缓存中尝试获取数据
-        dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
-        //如果获取到了，直接返回
-        if (dishDtoList != null) {
-            return dishDtoList;
-        }
-        //如果没获取到，查询数据库并添加缓存
 
         //1，查询菜品基本信息
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
@@ -206,9 +193,6 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
                     return dto;
                 })
                 .collect(Collectors.toList());
-
-        //添加缓存
-        redisTemplate.opsForValue().set(key, dishDtoList);
 
         return dishDtoList;
     }

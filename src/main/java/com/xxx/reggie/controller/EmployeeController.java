@@ -66,9 +66,8 @@ public class EmployeeController {
      */
     @PostMapping("/logout")
     public R<String> logout(HttpServletRequest request) {
-        //1,清除session中保存的数据
+        //清除session中保存的数据
         request.getSession().removeAttribute("employee");
-
         return R.success("退出成功");
     }
 
