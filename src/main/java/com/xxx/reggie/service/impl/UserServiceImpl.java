@@ -8,10 +8,11 @@ import com.xxx.reggie.mapper.UserMapper;
 import com.xxx.reggie.pojo.User;
 import com.xxx.reggie.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * reggie_take_out.com.xxx.reggie.service.impl
@@ -23,15 +24,17 @@ import javax.servlet.http.HttpServletRequest;
 @Service
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
     /**
      * 登录：如果是新用户会注册账户
      *
      * @param userDto userDto对象，包含手机号和验证码
-     * @param request 取出保存的验证码
      * @return 登录成功，将用户信息发送给前端，保存到浏览器
      */
     @Override
-    public User login(UserDto userDto, HttpServletRequest request) {
+    public User login(UserDto userDto) {
         //1，获取登录手机号
         String phone = userDto.getPhone();
         if (!StringUtils.hasText(phone)) {
@@ -42,12 +45,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!StringUtils.hasText(userCode)) {
             throw new CustomException("验证码为空");
         }
-        //3，获取正确的验证码
-        String rightCode = (String) request.getSession().getAttribute(phone);
+
+        //3，通过session获取正确的验证码
+        //String rightCode = (String) request.getSession().getAttribute(phone);
+
+        //3，通过redis获取正确的验证码
+        String rightCode = redisTemplate.opsForValue().get(phone);
+
+        if (rightCode == null) {
+            throw new CustomException("验证码已过期，请重新获取");
+        }
+
         //4，比较验证码
         if (!rightCode.equals(userCode)) {
             throw new CustomException("验证码错误");
         }
+
         //5，判断该用户是否是新用户
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(User::getPhone, phone);
@@ -65,6 +78,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 throw new CustomException("该用户已被禁用");
             }
         }
+
+        //7，登陆成功，删除缓存redis中的验证码
+        redisTemplate.delete(phone);
+
         return user;
     }
 }

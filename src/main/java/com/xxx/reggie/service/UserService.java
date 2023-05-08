@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.xxx.reggie.dto.UserDto;
 import com.xxx.reggie.pojo.User;
 
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * reggie_take_out.com.xxx.reggie.service
@@ -18,8 +17,7 @@ public interface UserService extends IService<User> {
      * 登录：如果是新用户会注册账户
      *
      * @param userDto userDto对象，包含手机号和验证码
-     * @param request 取出保存的验证码
      * @return 登录成功，将用户信息发送给前端，保存到浏览器
      */
-    User login(UserDto userDto, HttpServletRequest request);
+    User login(UserDto userDto);
 }

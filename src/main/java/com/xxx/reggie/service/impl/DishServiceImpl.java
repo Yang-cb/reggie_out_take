@@ -12,6 +12,7 @@ import com.xxx.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,8 @@ import java.util.stream.Collectors;
 public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements DishService {
     @Autowired
     private DishFlavorService dishFlavorService;
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
 
     /**
      * 保存 菜品基本信息 及 菜品的口味信息，需要两张表
@@ -59,6 +62,10 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
         //4，保存口味到口味表 dish_flavor
         dishFlavorService.saveBatch(flavors);
+
+        //5，清除redis中的缓存
+        String key = "dish_" + dishDto.getCategoryId();
+        redisTemplate.delete(key);
     }
 
     /**
@@ -108,8 +115,11 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
                     return flavor;
                 })
                 .collect(Collectors.toList());
-
         dishFlavorService.saveBatch(flavors);
+        //4，清除redis原有的缓存数据
+        //构造一个关于该分类的key
+        String key = "dish_" + dishDto.getCategoryId();
+        redisTemplate.delete(key);
     }
 
     /**
@@ -163,6 +173,18 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
      */
     @Override
     public List<DishDto> listDaf(DishDto dishDto) {
+        List<DishDto> dishDtoList = null;
+
+        //构造一个key
+        String key = "dish_" + dishDto.getCategoryId();
+        //先从redis缓存中尝试获取数据
+        dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
+        //如果获取到了，直接返回
+        if (dishDtoList != null) {
+            return dishDtoList;
+        }
+        //如果没获取到，查询数据库并添加缓存
+
         //1，查询菜品基本信息
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
@@ -172,7 +194,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
                 .orderByAsc(Dish::getUpdateTime);
         List<Dish> dishList = this.list(queryWrapper);
         //2，基本信息的基础上添加口味信息
-        List<DishDto> dishDtoList = dishList.stream().map(dish -> {
+        dishDtoList = dishList.stream().map(dish -> {
                     DishDto dto = new DishDto();
                     //拷贝菜品基本信息
                     BeanUtils.copyProperties(dish, dto);
@@ -184,6 +206,10 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
                     return dto;
                 })
                 .collect(Collectors.toList());
+
+        //添加缓存
+        redisTemplate.opsForValue().set(key, dishDtoList);
+
         return dishDtoList;
     }
 }

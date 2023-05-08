@@ -2,12 +2,17 @@ server:
   port: 8080
 
 spring:
-  datasource:
+  datasource: #数据源
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
       url: jdbc:mysql://localhost:3306/reggie
       username: root
       password: root
+  redis: #redis配置
+    host: localhost
+    database: 0
+    port: 6379
+#    password: ???
 
 
 mybatis-plus:
